@@ -25,36 +25,88 @@ public class Irri {
         boolean isRunning = true;
         while (isRunning) {
             String input = inputScanner.nextLine();
-            if (input.equalsIgnoreCase("bye")) {
-                isRunning = false;
-                continue;
+            try {
+                if (input.equalsIgnoreCase("bye")) {
+                    isRunning = false;
+                    continue;
+                }
+                if (input.equalsIgnoreCase("list")) {
+                    printTaskList(tasks, taskCount);
+                    continue;
+                }
+                if (input.toLowerCase().startsWith("todo ")) {
+                    taskCount = handleTodo(input, tasks, taskCount);
+                    continue;
+                }
+                if (input.toLowerCase().startsWith("deadline ")) {
+                    taskCount = handleDeadline(input, tasks, taskCount);
+                    continue;
+                }
+                if (input.toLowerCase().startsWith("event ")) {
+                    taskCount = handleEvent(input, tasks, taskCount);
+                    continue;
+                }
+                if (input.toLowerCase().startsWith("mark ")) {
+                    handleMark(input, tasks, taskCount);
+                    continue;
+                }
+                if (input.toLowerCase().startsWith("unmark ")) {
+                    handleUnmark(input, tasks, taskCount);
+                    continue;
+                }
+                throw new IrriException("I'm sorry, but I don't know what to do.");
+            } catch (IrriException e) {
+                printError(e.getMessage());
             }
-            if (input.equalsIgnoreCase("list")) {
-                printTaskList(tasks, taskCount);
-                continue;
-            }
-            if (input.toLowerCase().startsWith("todo ")) {
-                taskCount = handleTodo(input, tasks, taskCount);
-                continue;
-            }
-            if (input.toLowerCase().startsWith("deadline ")) {
-                taskCount = handleDeadline(input, tasks, taskCount);
-                continue;
-            }
-            if (input.toLowerCase().startsWith("event ")) {
-                taskCount = handleEvent(input, tasks, taskCount);
-                continue;
-            }
-            if (input.toLowerCase().startsWith("mark ")) {
-                handleMark(input, tasks, taskCount);
-                continue;
-            }
-            if (input.toLowerCase().startsWith("unmark ")) {
-                handleUnmark(input, tasks, taskCount);
-                continue;
-            }
-            printUnknownCommand();
         }
+    }
+
+    private static int handleTodo(String input, Task[] tasks, int taskCount) throws IrriException {
+        String description = Parser.parseTodo(input);
+        tasks[taskCount] = new ToDo(description);
+        taskCount++;
+        printAddConfirmation(tasks[taskCount - 1], taskCount);
+        return taskCount;
+    }
+
+    private static int handleDeadline(String input, Task[] tasks, int taskCount) throws IrriException {
+        String[] parts = Parser.parseDeadline(input);
+        tasks[taskCount] = new Deadline(parts[0], parts[1]);
+        taskCount++;
+        printAddConfirmation(tasks[taskCount - 1], taskCount);
+        return taskCount;
+    }
+
+    private static int handleEvent(String input, Task[] tasks, int taskCount) throws IrriException {
+        String[] parts = Parser.parseEvent(input);
+        tasks[taskCount] = new Event(parts[0], parts[1], parts[2]);
+        taskCount++;
+        printAddConfirmation(tasks[taskCount - 1], taskCount);
+        return taskCount;
+    }
+
+    private static void handleMark(String input, Task[] tasks, int taskCount) throws IrriException {
+        int index = Parser.parseTaskNumber(input, "mark");
+        if (index >= taskCount) {
+            throw new IrriException("Task number " + (index + 1) + " does not exists. " + "You have " + taskCount + " task" + (taskCount == 1 ? "" : "s") + " in the list.");
+        }
+        tasks[index].markAsDone();
+        System.out.println(LINE);
+        System.out.println(" Nice! I've marked this task as done:");
+        System.out.println("   " + tasks[index]);
+        System.out.println(LINE);
+    }
+
+    private static void handleUnmark(String input, Task[] tasks, int taskCount) throws IrriException {
+        int index = Parser.parseTaskNumber(input, "unmark");
+        if (index >= taskCount) {
+            throw new IrriException("Task number \" + (index + 1) + \" does not exist. " + "You have " + taskCount + " task" + (taskCount == 1 ? "" : "s") + " in the list.");
+        }
+        tasks[index].markAsNotDone();
+        System.out.println(LINE);
+        System.out.println(" OK, I've marked this task as not done yet:");
+        System.out.println("   " + tasks[index]);
+        System.out.println(LINE);
     }
 
     private static void printWelcome() {
@@ -84,78 +136,10 @@ public class Irri {
         System.out.println(LINE);
     }
 
-    private static int handleTodo(String input, Task[] tasks, int taskCount) {
-        String description = input.substring(5);
-        tasks[taskCount] = new ToDo(description);
-        taskCount++;
-        printAddConfirmation(tasks[taskCount - 1], taskCount);
-        return taskCount;
-    }
-
-    private static int handleDeadline(String input, Task[] tasks, int taskCount) {
-        String rest = input.substring(9);
-        int byIndex = rest.indexOf(" /by ");
-        if (byIndex == -1) {
-            printInvalidFormat("deadline <description> /by <date/time>");
-            return taskCount;
-        }
-        String description = rest.substring(0, byIndex);
-        String by = rest.substring(byIndex + 5);
-        tasks[taskCount] = new Deadline(description, by);
-        taskCount++;
-        printAddConfirmation(tasks[taskCount - 1], taskCount);
-        return taskCount;
-    }
-
-    private static int handleEvent(String input, Task[] tasks, int taskCount) {
-        String rest = input.substring(6);
-        int fromIndex = rest.indexOf(" /from ");
-        int toIndex = rest.indexOf(" /to ");
-        if (fromIndex == -1 || toIndex == -1 || fromIndex > toIndex) {
-            printInvalidFormat("event <description> /from <start> /to <end>");
-            return taskCount;
-        }
-        String description = rest.substring(0, fromIndex);
-        String from = rest.substring(fromIndex + 6, toIndex);
-        String to = rest.substring(toIndex + 5);
-        tasks[taskCount] = new Event(description, from, to);
-        taskCount++;
-        printAddConfirmation(tasks[taskCount - 1], taskCount);
-        return taskCount;
-    }
-
-    private static void handleMark(String input, Task[] tasks, int taskCount){
-        try {
-            int index = Integer.parseInt(input.substring(5)) - 1;
-            if (index >= 0 && index < taskCount) {
-                tasks[index].markAsDone();
-                System.out.println(LINE);
-                System.out.println(" Nice! I've marked this task as done:");
-                System.out.println("   " + tasks[index]);
-                System.out.println(LINE);
-            } else {
-                printInvalidTaskNumber(taskCount);
-            }
-        } catch (NumberFormatException e) {
-            printInvalidNumberFormat("mark");
-        }
-    }
-
-    private static void handleUnmark(String input, Task[] tasks, int taskCount){
-        try {
-            int index = Integer.parseInt(input.substring(7)) - 1;
-            if (index >= 0 && index < taskCount) {
-                tasks[index].markAsNotDone();
-                System.out.println(LINE);
-                System.out.println(" OK, I've marked this task as not done yet:");
-                System.out.println("   " + tasks[index]);
-                System.out.println(LINE);
-            } else {
-                printInvalidTaskNumber(taskCount);
-            }
-        } catch (NumberFormatException e) {
-            printInvalidNumberFormat("unmark");
-        }
+    private static void printError(String message) {
+        System.out.println(LINE);
+        System.out.println("Oh no! " + message);
+        System.out.println(LINE);
     }
 
     private static void printAddConfirmation(Task task, int taskCount) {
@@ -164,36 +148,5 @@ public class Irri {
         System.out.println("   " + task);
         System.out.println(" Now you have " + taskCount + " tasks in the list.");
         System.out.println(LINE);
-    }
-
-    private static void printInvalidFormat(String format) {
-        System.out.println(LINE);
-        System.out.println(" Invalid format. Use: " + format);
-        System.out.println(LINE);
-    }
-
-    private static void printInvalidTaskNumber(int taskCount) {
-        System.out.println(LINE);
-        System.out.println(" Invalid task number. Please enter a number between 1 and " + taskCount);
-        System.out.println(LINE);
-    }
-
-    private static void printInvalidNumberFormat(String command) {
-        System.out.println(LINE);
-        System.out.println(" Please enter a valid task number (e.g., " + command + " 2)");
-        System.out.println(LINE);
-    }
-
-    private static void printUnknownCommand(){
-            System.out.println(LINE);
-            System.out.println(" Unknown command. Available commands:");
-            System.out.println("   todo <description>");
-            System.out.println("   deadline <description> /by <date>");
-            System.out.println("   event <description> /from <start> /to <end>");
-            System.out.println("   list");
-            System.out.println("   mark <number>");
-            System.out.println("   unmark <number>");
-            System.out.println("   bye");
-            System.out.println(LINE);
     }
 }
