@@ -13,15 +13,15 @@ public abstract class Task {
         return (isDone ? "X" : " ");
     }
 
-    public void markAsDone(){
+    public void markAsDone() {
         this.isDone = true;
     }
 
-    public void markAsNotDone(){
+    public void markAsNotDone() {
         this.isDone = false;
     }
 
-    public String getDescription(){
+    public String getDescription() {
         return description;
     }
 
@@ -31,8 +31,10 @@ public abstract class Task {
 
     public abstract String getTypeIcon();
 
+    public abstract String toFileFormat();
+
     @Override
-    public String toString(){
+    public String toString() {
         return "[" + getTypeIcon() + "][" + getStatusIcon() + "] " + description;
     }
 }

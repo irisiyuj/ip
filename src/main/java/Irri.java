@@ -1,6 +1,5 @@
 import task.*;
 
-import java.util.Locale;
 import java.util.Scanner;
 import java.util.ArrayList;
 
@@ -22,10 +21,12 @@ public class Irri {
     }
 
     private static void runCommandLoop(Scanner inputScanner) {
-        ArrayList<Task> tasks = new ArrayList<>();
+        ArrayList<Task> tasks = Storage.load();
         boolean isRunning = true;
+
         while (isRunning) {
             String input = inputScanner.nextLine();
+
             try {
                 if (input.equalsIgnoreCase("bye")) {
                     isRunning = false;
@@ -70,18 +71,21 @@ public class Irri {
         String description = Parser.parseTodo(input);
         tasks.add(new ToDo(description));
         printAddConfirmation(tasks.get(tasks.size() - 1), tasks.size());
+        Storage.save(tasks);
     }
 
     private static void handleDeadline(String input, ArrayList<Task> tasks) throws IrriException {
         String[] parts = Parser.parseDeadline(input);
         tasks.add(new Deadline(parts[0], parts[1]));
         printAddConfirmation(tasks.get(tasks.size() - 1), tasks.size());
+        Storage.save(tasks);
     }
 
     private static void handleEvent(String input, ArrayList<Task> tasks) throws IrriException {
         String[] parts = Parser.parseEvent(input);
         tasks.add(new Event(parts[0], parts[1], parts[2]));
         printAddConfirmation(tasks.get(tasks.size() - 1), tasks.size());
+        Storage.save(tasks);
     }
 
     private static void handleDelete(String input, ArrayList<Task> tasks) throws IrriException {
@@ -96,18 +100,20 @@ public class Irri {
         System.out.println("   " + removed);
         System.out.println(" Now you have " + tasks.size() + " tasks in the list.");
         System.out.println(LINE);
+        Storage.save(tasks);
     }
 
     private static void handleMark(String input, ArrayList<Task> tasks) throws IrriException {
         int index = Parser.parseTaskNumber(input, "mark");
         if (index >= tasks.size()) {
-            throw new IrriException("Task number " + (index + 1) + " does not exists. " + "You have " + tasks.size() + " task" + (tasks.size() == 1 ? "" : "s") + " in the list.");
+            throw new IrriException("Task number " + (index + 1) + " does not exist. " + "You have " + tasks.size() + " task" + (tasks.size() == 1 ? "" : "s") + " in the list.");
         }
         tasks.get(index).markAsDone();
         System.out.println(LINE);
         System.out.println(" Nice! I've marked this task as done:");
         System.out.println("   " + tasks.get(index));
         System.out.println(LINE);
+        Storage.save(tasks);
     }
 
     private static void handleUnmark(String input, ArrayList<Task> tasks) throws IrriException {
@@ -120,6 +126,7 @@ public class Irri {
         System.out.println(" OK, I've marked this task as not done yet:");
         System.out.println("   " + tasks.get(index));
         System.out.println(LINE);
+        Storage.save(tasks);
     }
 
     private static void printWelcome() {
