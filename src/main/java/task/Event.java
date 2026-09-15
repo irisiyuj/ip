@@ -3,22 +3,23 @@ package task;
 public class Event extends Task{
     protected String from;
     protected String to;
+
     public Event(String description, String from, String to){
         super(description);
         this.from = from;
         this.to = to;
     }
 
-    public String getFrom(){
+    public String getFrom() {
         return from;
     }
 
-    public String getTo(){
+    public String getTo() {
         return to;
     }
 
     @Override
-    public String getTypeIcon(){
+    public String getTypeIcon() {
         return "E";
     }
 
@@ -26,5 +27,10 @@ public class Event extends Task{
     public String toString() {
         return "[" + getTypeIcon() + "][" + getStatusIcon() + "] " + description
                 + " (from: " + from + " to: " + to + ")";
+    }
+
+    @Override
+    public String toFileFormat() {
+        return "E | " + (isDone ? "1" : "0") + " | " +description + " | " +from + " | " + to;
     }
 }
