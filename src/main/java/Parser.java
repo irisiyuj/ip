@@ -1,12 +1,15 @@
+import task.*;
+
 public class Parser {
-    public static String parseTodo(String input) throws IrriException{
+    public static Task parseTodo(String input) throws IrriException{
         String description = input.substring(5).trim();
         if (description.isEmpty()){
             throw new IrriException("The description of a todo cannot be empty.");
         }
-        return description;
+        return new ToDo(description);
     }
-    public static String[] parseDeadline(String input) throws IrriException{
+
+    public static Task parseDeadline(String input) throws IrriException{
         String rest = input.substring(9).trim();
         int byIndex = rest.indexOf(" /by ");
         if (byIndex == -1){
@@ -20,9 +23,10 @@ public class Parser {
         if (by.isEmpty()){
             throw new IrriException("The deadline date cannot be empty. Use: /by <date>");
         }
-        return new String[] {description, by};
+        return new Deadline(description, by);
     }
-    public static String[] parseEvent(String input) throws IrriException{
+
+    public static Task parseEvent(String input) throws IrriException{
         String rest = input.substring(6).trim();
         int fromIndex = rest.indexOf(" /from ");
         int toIndex = rest.indexOf(" /to ");
@@ -41,8 +45,9 @@ public class Parser {
         if (to.isEmpty()){
             throw new IrriException("The end time cannot be empty. Use: /to <end>");
         }
-        return new String[]{description, from, to};
+        return new Event(description, from, to);
     }
+
     public static int parseTaskNumber(String input, String command) throws IrriException{
         String rest = input.substring(command.length()).trim();
         if (rest.isEmpty()){
@@ -50,11 +55,11 @@ public class Parser {
         }
         try {
             int index = Integer.parseInt(rest) - 1;
-            if (index < 0){
+            if (index < 0) {
                 throw new IrriException("Task number must be positive.");
             }
             return index;
-        }catch (NumberFormatException e){
+        } catch (NumberFormatException e){
             throw new IrriException("Please enter a valid task number (e.g., \" + command + \" 2)");
         }
     }

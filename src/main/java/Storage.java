@@ -8,17 +8,20 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Storage {
-    private static final String FILE_PATH = "./data/irri.txt";
-    private static final String DIR_PATH = "./data";
+    private final String filePath;
 
-    public static void save(ArrayList<Task> tasks) {
+    public Storage(String filePath) {
+        this.filePath = filePath;
+    }
+
+    public void save(ArrayList<Task> tasks) {
         try {
-            File dir = new File(DIR_PATH);
-            if (!dir.exists()) {
-                dir.mkdirs();
+            File file = new File(filePath);
+            File parent = file.getParentFile();
+            if (parent != null && !parent.exists()) {
+                parent.mkdirs();
             }
-
-            FileWriter writer = new FileWriter(FILE_PATH);
+            FileWriter writer = new FileWriter(file);
             for (Task task: tasks) {
                 writer.write(task.toFileFormat() + System.lineSeparator());
             }
@@ -28,9 +31,9 @@ public class Storage {
         }
     }
 
-    public static ArrayList<Task> load() {
+    public ArrayList<Task> load() throws IrriException {
         ArrayList<Task> tasks = new ArrayList<>();
-        File file = new File(FILE_PATH);
+        File file = new File(filePath);
 
         if (!file.exists()) {
             return tasks;
@@ -47,18 +50,17 @@ public class Storage {
             }
             fileScanner.close();
         } catch (FileNotFoundException e) {
-            System.out.println(" Warning: Unable to load tasks from file.");
+            throw new IrriException(" Warning: Unable to load tasks from file.");
         }
 
         return tasks;
     }
 
-    private static Task parseTask(String line) {
+    private Task parseTask(String line) {
         String[] parts = line.split(" \\| ");
         if (parts.length < 3) {
             return null;
         }
-
         String type = parts[0];
         boolean isDone = parts[1].equals("1");
         String description = parts[2];
