@@ -77,6 +77,8 @@ public class Irri {
                 ui.printError(e.getMessage());
             }
         }
+        ui.printGoodbye();
+        ui.close();
     }
 
     /**
