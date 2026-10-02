@@ -63,4 +63,12 @@ public class Parser {
             throw new IrriException("Please enter a valid task number (e.g., \" + command + \" 2)");
         }
     }
+
+    public static String parseFind(String input) throws IrriException {
+        String keyword = input.substring(5).trim();
+        if (keyword.isEmpty()) {
+            throw new IrriException("Please provide a keyword to search for. " + "Use: find <keyword>");
+        }
+        return keyword;
+    }
 }
