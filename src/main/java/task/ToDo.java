@@ -1,5 +1,8 @@
 package task;
 
+/**
+ * Represents a todo task without any date/time attached.
+ */
 public class ToDo extends Task{
     public ToDo(String description) {
         super(description);
