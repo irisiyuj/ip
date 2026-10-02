@@ -58,6 +58,10 @@ public class Irri {
                     handleUnmark(input);
                     continue;
                 }
+                if (input.toLowerCase().startsWith("find ")) {
+                    handleFind(input);
+                    continue;
+                }
                 throw new IrriException("I'm sorry, but I don't know what to do.");
             } catch (IrriException e) {
                 ui.printError(e.getMessage());
@@ -116,6 +120,11 @@ public class Irri {
         ui.printTaskUnmarked(tasks.get(index));
     }
 
+    private void handleFind(String input) throws IrriException {
+        String keyword = Parser.parseFind(input);
+        ArrayList<Task> matchingTasks = tasks.find(keyword);
+        ui.printMatchingTasks(matchingTasks);
+    }
     public static void main(String[] args) {
         new Irri("./data/irri.txt").runCommandLoop();
     }
