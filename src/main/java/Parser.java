@@ -1,6 +1,17 @@
 import task.*;
 
+/**
+ * Parses user commands into executable actions.
+ */
 public class Parser {
+
+    /**
+     * Parses a todo command.
+     *
+     * @param input The full user input.
+     * @return A ToDo task.
+     * @throws IrriException If the description is empty.
+     */
     public static Task parseTodo(String input) throws IrriException{
         String description = input.substring(5).trim();
         if (description.isEmpty()){
@@ -9,6 +20,13 @@ public class Parser {
         return new ToDo(description);
     }
 
+    /**
+     * Parses a deadline command.
+     *
+     * @param input The full user input.
+     * @return A Deadline task.
+     * @throws IrriException If the format is invalid.
+     */
     public static Task parseDeadline(String input) throws IrriException{
         String rest = input.substring(9).trim();
         int byIndex = rest.indexOf(" /by ");
@@ -26,6 +44,13 @@ public class Parser {
         return new Deadline(description, by);
     }
 
+    /**
+     * Parses an event command.
+     *
+     * @param input The full user input.
+     * @return An Event task.
+     * @throws IrriException If the format is invalid.
+     */
     public static Task parseEvent(String input) throws IrriException{
         String rest = input.substring(6).trim();
         int fromIndex = rest.indexOf(" /from ");
@@ -48,6 +73,14 @@ public class Parser {
         return new Event(description, from, to);
     }
 
+    /**
+     * Parses a task number from a mark, unmark, or delete command.
+     *
+     * @param input The full user input.
+     * @param command The command name ("mark", "unmark", or "delete").
+     * @return The 0-based task index.
+     * @throws IrriException If the number is missing or invalid.
+     */
     public static int parseTaskNumber(String input, String command) throws IrriException{
         String rest = input.substring(command.length()).trim();
         if (rest.isEmpty()){
@@ -64,6 +97,13 @@ public class Parser {
         }
     }
 
+    /**
+     * Parses a find command to extract the search keyword.
+     *
+     * @param input The full user input.
+     * @return The search keyword.
+     * @throws IrriException If the keyword is empty.
+     */
     public static String parseFind(String input) throws IrriException {
         String keyword = input.substring(5).trim();
         if (keyword.isEmpty()) {

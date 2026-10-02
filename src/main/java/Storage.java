@@ -7,13 +7,28 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+/**
+ * Handles saving and loading of tasks from the hard disk.
+ * Uses a plain text file with pipe-separated fields.
+ */
 public class Storage {
     private final String filePath;
 
+    /**
+     * Constructs a Storage object with the given file path.
+     *
+     * @param filePath The path to the data file.
+     */
     public Storage(String filePath) {
         this.filePath = filePath;
     }
 
+    /**
+     * Saves all tasks to the file.
+     * Creates the parent directory if it does not exist.
+     *
+     * @param tasks The list of tasks to save.
+     */
     public void save(ArrayList<Task> tasks) {
         try {
             File file = new File(filePath);
@@ -31,6 +46,13 @@ public class Storage {
         }
     }
 
+    /**
+     * Loads tasks from the file.
+     * Returns an empty list if the file does not exist.
+     *
+     * @return The list of loaded tasks.
+     * @throws IrriException If the file cannot be read.
+     */
     public ArrayList<Task> load() throws IrriException {
         ArrayList<Task> tasks = new ArrayList<>();
         File file = new File(filePath);
@@ -56,6 +78,12 @@ public class Storage {
         return tasks;
     }
 
+    /**
+     * Parses a single line from the data file into a Task object.
+     *
+     * @param line The line to parse.
+     * @return The parsed Task, or null if the line is invalid.
+     */
     private Task parseTask(String line) {
         String[] parts = line.split(" \\| ");
         if (parts.length < 3) {
